@@ -767,24 +767,11 @@ st.markdown(
 
 # 3. 이용 순서 안내
 st.markdown(
-    """
-    <div class="flow-strip">
-        <div class="flow-step">
-            <div class="step-number">1</div>
-            <div>상품 A·B 사진 등록</div>
-        </div>
-
-        <div class="flow-step">
-            <div class="step-number">2</div>
-            <div>나의 쇼핑 조건 입력</div>
-        </div>
-
-        <div class="flow-step">
-            <div class="step-number">3</div>
-            <div>소담픽의 최종 선택</div>
-        </div>
-    </div>
-    """,
+    """<div class="flow-strip">
+<div class="flow-step"><div class="step-number">1</div><div>상품 A·B 사진 등록</div></div>
+<div class="flow-step"><div class="step-number">2</div><div>나의 쇼핑 조건 입력</div></div>
+<div class="flow-step"><div class="step-number">3</div><div>소담픽의 최종 선택</div></div>
+</div>""",
     unsafe_allow_html=True
 )
 
