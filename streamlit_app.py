@@ -11,282 +11,419 @@ from gtts import gTTS
 from PIL import Image
 
 
-# Streamlit 페이지 기본 설정
+# 1. Streamlit 페이지 기본 설정
 st.set_page_config(
-    page_title="소담픽 | 둘 중 하나를 고르는 AI 쇼핑 결정 비서",
-    page_icon="🛍️",
+    page_title="소담픽 | 두 상품 중 하나를 고르는 AI 쇼핑 결정 비서",
+    page_icon="🧭",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 
-# 소담픽 브랜드 디자인
+# 2. 소담픽 브랜드 디자인
 st.markdown(
     """
     <style>
+    :root {
+        --sodam-navy: #17213B;
+        --sodam-coral: #F45B49;
+        --sodam-coral-dark: #DA4635;
+        --sodam-blue: #4067D6;
+        --sodam-yellow: #F4C84A;
+        --sodam-bg: #F7F8FB;
+        --sodam-card: #FFFFFF;
+        --sodam-border: #E3E7EF;
+        --sodam-muted: #697386;
+    }
+
+    html, body, [class*="css"] {
+        font-family:
+            Pretendard,
+            "Noto Sans KR",
+            "Apple SD Gothic Neo",
+            "Malgun Gothic",
+            sans-serif;
+    }
 
     .stApp {
-        background: #FFF9F3;
-        color: #18233A;
+        background: var(--sodam-bg);
+        color: var(--sodam-navy);
+    }
+
+    header[data-testid="stHeader"] {
+        background: rgba(247, 248, 251, 0.92);
+        border-bottom: 1px solid var(--sodam-border);
+        backdrop-filter: blur(10px);
     }
 
     .block-container {
-        max-width: 1180px;
-        padding-top: 4rem;
+        max-width: 1240px;
+        padding-top: 2.4rem;
         padding-bottom: 5rem;
     }
 
-    /* 본문과 안내 글씨 확대 */
-    div[data-testid="stMarkdownContainer"] p {
-        font-size: 1.06rem;
-        line-height: 1.65;
-    }
-
-    div[data-testid="stWidgetLabel"] p {
-        font-size: 1rem;
-        line-height: 1.5;
-        font-weight: 700;
-    }
-
-    div[data-testid="stCaptionContainer"] p {
-        font-size: 0.95rem;
-        line-height: 1.55;
-    }
-
-    h2 {
-        font-size: 2.15rem !important;
-        line-height: 1.3 !important;
-    }
-
-    h3 {
-        font-size: 1.6rem !important;
-        line-height: 1.35 !important;
-    }
-
-    /* 메인 화면 */
-    .hero-badge-area {
-        text-align: center;
-        margin-bottom: 10px;
-    }
-
-    .brand-badge {
-        display: inline-block;
-        padding: 8px 16px;
-        border-radius: 999px;
-        background: #FFE5DF;
-        color: #E54832;
-        font-weight: 800;
-    }
-
-    .hero-title {
-        margin-top: 14px;
-        margin-bottom: 16px;
-        text-align: center;
-        font-size: 3.4rem;
-        line-height: 1.2;
-        font-weight: 900;
-        letter-spacing: -2px;
-        color: #18233A;
-    }
-
-    .accent {
-        color: #F0523D;
-    }
-
-    .hero-description {
-        margin-bottom: 20px;
-        text-align: center;
-        font-size: 1.15rem;
-        line-height: 1.75;
-        color: #5E6675;
-    }
-
-    .hero-placeholder {
-        max-width: 620px;
-        min-height: 300px;
-        margin: 0 auto;
-        padding: 70px 40px;
-        border-radius: 32px;
-        background:
-            linear-gradient(135deg, #FFE2D8, #FFF1CC);
-        text-align: center;
-        font-size: 6rem;
-        box-shadow: 0 20px 50px rgba(42, 33, 28, 0.12);
-    }
-
-    /* 모든 이미지 가운데 정렬 */
-    div[data-testid="stImage"] {
+    /* 상단 브랜드 영역 */
+    .brand-row {
         display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 12px;
+    }
+
+    .brand-icon {
+        display: flex;
+        align-items: center;
         justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        background: #FFF0EC;
+        font-size: 1.55rem;
     }
 
-    div[data-testid="stImage"] img {
-        max-width: 100%;
-        height: auto;
+    .brand-name {
+        color: var(--sodam-navy);
+        font-size: 1.45rem;
+        font-weight: 900;
+        letter-spacing: -0.5px;
     }
 
-    /* 버튼 디자인 */
-    div[data-testid="stButton"] button {
-        min-height: 52px;
-        border: none;
-        border-radius: 14px;
-        background: #F0523D;
-        color: white;
-        font-size: 1rem;
+    .brand-description {
+        color: var(--sodam-muted);
+        font-size: 0.95rem;
+        margin-top: 2px;
+    }
+
+    .page-title {
+        color: var(--sodam-navy);
+        font-size: 2.65rem;
+        line-height: 1.25;
+        font-weight: 900;
+        letter-spacing: -1.7px;
+        margin: 22px 0 10px;
+    }
+
+    .page-title .accent {
+        color: var(--sodam-coral);
+    }
+
+    .page-description {
+        color: var(--sodam-muted);
+        font-size: 1.08rem;
+        line-height: 1.75;
+        margin-bottom: 25px;
+    }
+
+    /* 이용 단계 */
+    .flow-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin: 24px 0 34px;
+    }
+
+    .flow-step {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px 16px;
+        background: white;
+        border: 1px solid var(--sodam-border);
+        border-radius: 15px;
+        color: var(--sodam-navy);
         font-weight: 800;
     }
 
-    div[data-testid="stButton"] button:hover {
-        background: #D9412D;
+    .step-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 29px;
+        height: 29px;
+        border-radius: 50%;
+        background: #FFF0EC;
+        color: var(--sodam-coral);
+        font-size: 0.9rem;
+        font-weight: 900;
+    }
+
+    /* 안내 및 결과 카드 */
+    .section-intro {
+        margin-bottom: 18px;
+    }
+
+    .section-label {
+        color: var(--sodam-coral);
+        font-size: 0.86rem;
+        font-weight: 900;
+        letter-spacing: 0.3px;
+        margin-bottom: 6px;
+    }
+
+    .section-title {
+        color: var(--sodam-navy);
+        font-size: 1.55rem;
+        font-weight: 900;
+        letter-spacing: -0.6px;
+        margin-bottom: 5px;
+    }
+
+    .section-description {
+        color: var(--sodam-muted);
+        font-size: 0.96rem;
+        line-height: 1.6;
+    }
+
+    .empty-result {
+        min-height: 260px;
+        padding: 40px 28px;
+        border: 1px dashed #C9D0DC;
+        border-radius: 20px;
+        background: #FAFBFD;
+        text-align: center;
+        color: var(--sodam-muted);
+    }
+
+    .empty-result-icon {
+        font-size: 2.5rem;
+        margin-bottom: 14px;
+    }
+
+    .empty-result-title {
+        color: var(--sodam-navy);
+        font-size: 1.15rem;
+        font-weight: 900;
+        margin-bottom: 7px;
+    }
+
+    /* Streamlit 기본 요소 */
+    h1, h2, h3 {
+        color: var(--sodam-navy);
+        letter-spacing: -0.6px;
+    }
+
+    p, label, .stCaption {
+        line-height: 1.6;
+    }
+
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background: var(--sodam-card);
+        border-color: var(--sodam-border);
+        border-radius: 20px;
+    }
+
+    div[data-testid="stButton"] button {
+        min-height: 48px;
+        border: 1px solid var(--sodam-border);
+        border-radius: 13px;
+        font-size: 0.98rem;
+        font-weight: 800;
+    }
+
+    div[data-testid="stButton"] button[kind="primary"] {
+        border: none;
+        background: var(--sodam-coral);
         color: white;
     }
 
-    /* 파일 업로드 영역 */
-    div[data-testid="stFileUploader"] {
-        padding: 12px;
-        border-radius: 18px;
+    div[data-testid="stButton"] button[kind="primary"]:hover {
+        background: var(--sodam-coral-dark);
+        color: white;
+    }
+
+    div[data-testid="stLinkButton"] a {
+        min-height: 46px;
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    div[data-testid="stFileUploaderDropzone"] {
+        min-height: 108px;
+        padding: 18px;
+        border: 1px dashed #BEC7D5;
+        border-radius: 15px;
+        background: #FAFBFD;
+    }
+
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stTextArea"] textarea,
+    div[data-baseweb="select"] > div {
+        border-color: var(--sodam-border);
+        border-radius: 12px;
         background: white;
     }
 
-    /* 사이드바 */
-    [data-testid="stSidebar"] {
-        background: #F1F4FA;
-    }
-
-    /* 음성녹음 오류 문구가 잘리지 않도록 높이 확보 */
     div[data-testid="stAudioInput"] {
-        min-height: 88px !important;
+        min-height: 94px !important;
         overflow: visible !important;
         padding-bottom: 8px;
     }
 
     div[data-testid="stAudioInputWaveSurfer"] {
-        min-height: 56px !important;
+        min-height: 58px !important;
         overflow: visible !important;
     }
 
-    /* 휴대폰 화면 */
+    /* 사이드바 */
+    section[data-testid="stSidebar"] {
+        background: white;
+        border-right: 1px solid var(--sodam-border);
+    }
+
+    section[data-testid="stSidebar"] .block-container {
+        padding-top: 2rem;
+    }
+
+    .sidebar-guide {
+        padding: 13px 14px;
+        border-radius: 13px;
+        background: #F5F7FB;
+        color: #596476;
+        font-size: 0.88rem;
+        line-height: 1.6;
+    }
+
     @media (max-width: 768px) {
         .block-container {
-            padding-top: 3rem;
+            padding-top: 1.4rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
         }
 
-        .hero-title {
-            font-size: 2.35rem;
+        .page-title {
+            font-size: 2rem;
             letter-spacing: -1px;
         }
 
-        .hero-description {
+        .page-description {
             font-size: 1rem;
         }
 
+        .flow-strip {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .flow-step {
+            padding: 11px 13px;
+        }
+
         div[data-testid="stAudioInput"] {
-            min-height: 100px !important;
+            min-height: 105px !important;
         }
     }
-
     </style>
     """,
     unsafe_allow_html=True
 )
 
 
-# 사이드바 설정
+# 3. 사이드바 설정
 with st.sidebar:
-    st.title("⚙️ 소담픽 설정")
-    st.caption("두 상품 중 하나를 고르는 AI 쇼핑 결정 비서")
+    st.markdown("## 🧭 소담픽 설정")
+    st.caption("나의 조건에 맞춰 두 상품 중 하나를 골라드려요.")
+
+    st.markdown("---")
 
     api_key = st.text_input(
-        "내 Gemini API 키",
+        "Gemini 연결키(API 키)",
         type="password",
-        placeholder="API 키를 입력해주세요"
+        placeholder="Google에서 만든 키를 붙여 넣어주세요",
+        key="api_key_input"
     )
 
-    st.caption(
-        "입력한 키는 저장하거나 GitHub에 기록하지 않으며, "
-        "현재 분석 요청에만 사용합니다."
-    )
+    if api_key:
+        st.caption("🟢 Gemini 연결 준비가 완료됐어요.")
+    else:
+        st.caption("연결키를 입력하면 상품 사진을 분석할 수 있어요.")
+
+    with st.expander("🔑 처음 사용하시나요? 연결 방법 보기"):
+        st.markdown(
+            """
+            소담픽은 상품 사진을 분석할 때  
+            Google의 **Gemini AI**를 이용합니다.
+
+            따라서 Gemini와 연결하기 위한  
+            **개인용 연결키(API 키)**가 필요합니다.
+
+            1. 아래 버튼을 눌러 Google 계정으로 로그인합니다.
+            2. **API 키 만들기**를 누릅니다.
+            3. 만들어진 키를 복사하여 위 입력칸에 붙여 넣습니다.
+
+            입력한 키는 소담픽에 저장되지 않습니다.  
+            API 키는 비밀번호처럼 다른 사람에게 공유하거나  
+            GitHub에 올리지 마세요.
+            """
+        )
+
+        st.link_button(
+            "Google에서 Gemini 연결키 만들기",
+            "https://aistudio.google.com/app/apikey",
+            use_container_width=True
+        )
+
+        st.caption(
+            "사용량과 이용 한도는 키를 발급받은 "
+            "본인의 Google 계정에 적용됩니다."
+        )
 
     st.markdown("---")
 
     decision_mode = st.radio(
-        "어떤 방식으로 골라드릴까요?",
+        "어떤 방식으로 비교할까요?",
         options=[
             "⚡ 빠른 결정",
             "🔍 꼼꼼한 결정"
         ],
-        index=0
+        index=0,
+        key="decision_mode"
     )
 
     if decision_mode == "⚡ 빠른 결정":
-        st.caption(
-            "핵심 조건을 중심으로 빠르게 하나를 추천해요."
-        )
+        st.caption("핵심 조건을 중심으로 빠르게 하나를 추천해요.")
     else:
-        st.caption(
-            "장단점과 구매 조건을 자세히 비교해요."
-        )
+        st.caption("두 상품의 차이와 확인사항을 자세히 비교해요.")
+
+    st.markdown("---")
+
+    # 기존 강의안의 대화 초기화 기능을
+    # 소담픽에 맞게 '새 비교 시작'으로 변경
+    if st.button(
+        "↻ 새 비교 시작",
+        use_container_width=True
+    ):
+        reset_keys = [
+            "product_a",
+            "product_b",
+            "recorded_audio",
+            "input_method",
+            "purpose_text",
+            "budget_text",
+            "priority_choice",
+            "result",
+            "result_audio",
+            "audio_error",
+            "analysis_mode_used"
+        ]
+
+        for key in reset_keys:
+            st.session_state.pop(key, None)
+
+        st.rerun()
+
+    st.caption(
+        "상품 사진과 입력 조건, 이전 추천 결과만 초기화됩니다. "
+        "Gemini 연결키와 비교 방식은 유지됩니다."
+    )
 
 
-# 사용자 선택과 실제 Gemini 모델 연결
+# 4. 사용자가 선택한 방식과 Gemini 모델 연결
 MODEL_OPTIONS = {
     "⚡ 빠른 결정": "gemini-3.5-flash-lite",
     "🔍 꼼꼼한 결정": "gemini-3.6-flash"
 }
 
 selected_model = MODEL_OPTIONS[decision_mode]
-
-
-# 중앙형 메인 화면
-st.markdown(
-    """
-    <div class="hero-badge-area">
-        <span class="brand-badge">
-            두 상품 전용 AI 결정 비서
-        </span>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-
-# 나침반 캐릭터 메인 이미지
-hero_path = Path("sodampick_hero.png")
-
-if hero_path.exists():
-    st.image(
-        str(hero_path),
-        width=620
-    )
-else:
-    st.markdown(
-        '<div class="hero-placeholder">A 🧭 B</div>',
-        unsafe_allow_html=True
-    )
-
-
-# 메인 문구
-st.markdown(
-    """
-    <div class="hero-title">
-        두 상품 사이에서 고민 중이라면,<br>
-        <span class="accent">소담픽</span>이 골라드려요!
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
-    <div class="hero-description">
-        최종 후보 A와 B의 사진과 나의 조건을 알려주세요.<br>
-        지금 나에게 더 맞는 하나와 선택 이유를 알려드립니다.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown("---")
 # 9-2. 이미지·음성 처리 및 Gemini 상품 비교 함수
 import json
 
@@ -575,179 +712,200 @@ def text_to_speech(result_text):
     audio_buffer.seek(0)
 
     return audio_buffer.getvalue()
-# 9-3. 상품 비교 화면과 AI 추천 결과 출력
+# 9-3. Quizell 스타일의 상품 비교 화면과 추천 결과 출력
 
 
-# 비교 시작 안내
-st.markdown("## 두 상품 중, 지금 나에게 더 맞는 하나는?")
-st.caption(
-    "아래 A와 B 영역에 최종 후보 사진을 각각 올려주세요."
+# 1. 입력값 초기화
+default_values = {
+    "purpose_text": "",
+    "budget_text": "",
+    "priority_choice": ""
+}
+
+for key, default_value in default_values.items():
+    if key not in st.session_state:
+        st.session_state[key] = default_value
+
+
+# 2. 소담픽 상단 브랜드 영역
+st.markdown(
+    """
+    <div class="brand-row">
+        <div class="brand-icon">🧭</div>
+        <div>
+            <div class="brand-name">소담픽</div>
+            <div class="brand-description">
+                두 상품 중 하나를 고르는 AI 쇼핑 결정 비서
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
-if not api_key:
-    st.info(
-        "🔐 왼쪽 사이드바에 본인의 Gemini API 키를 입력하면 "
-        "상품 비교를 시작할 수 있어요."
-    )
+st.markdown(
+    """
+    <div class="page-title">
+        두 상품 사이에서 고민 중이라면,<br>
+        <span class="accent">소담픽이 골라드려요.</span>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-
-# 상품 사진 업로드
-product_a_column, product_b_column = st.columns(
-    2,
-    gap="large"
+st.markdown(
+    """
+    <div class="page-description">
+        최종 후보인 상품 A와 B의 사진을 올리고,
+        사용하는 상황과 예산, 중요하게 보는 기준을 알려주세요.<br>
+        소담픽이 지금 나의 조건에 더 맞는 하나와 선택 이유를 정리해드립니다.
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 
-# 상품 A
-with product_a_column:
-    with st.container(border=True):
-        st.markdown(
-            """
-            <div style="
-                display:inline-block;
-                padding:7px 16px;
-                margin-bottom:10px;
-                border-radius:999px;
-                background:#FFD21F;
-                color:#18233A;
-                font-weight:900;
-            ">
-                A · 첫 번째 상품
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+# 3. 이용 순서 안내
+st.markdown(
+    """
+    <div class="flow-strip">
+        <div class="flow-step">
+            <div class="step-number">1</div>
+            <div>상품 A·B 사진 등록</div>
+        </div>
 
-        st.markdown(
-            "**① 여기에 상품 A 사진을 올려주세요**"
-        )
-        st.caption(
-            "첫 번째 후보의 정면 또는 전체 사진을 선택해주세요. "
-            "JPG·PNG·WEBP, 10MB 이하"
-        )
+        <div class="flow-step">
+            <div class="step-number">2</div>
+            <div>나의 쇼핑 조건 입력</div>
+        </div>
 
-        product_a = st.file_uploader(
-            "상품 A 사진",
-            type=["jpg", "jpeg", "png", "webp"],
-            key="product_a",
-            label_visibility="collapsed"
-        )
-
-        if product_a:
-            st.image(
-                product_a,
-                caption="상품 A",
-                width=260
-            )
+        <div class="flow-step">
+            <div class="step-number">3</div>
+            <div>소담픽의 최종 선택</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 
-# 상품 B
-with product_b_column:
-    with st.container(border=True):
-        st.markdown(
-            """
-            <div style="
-                display:inline-block;
-                padding:7px 16px;
-                margin-bottom:10px;
-                border-radius:999px;
-                background:#1557E8;
-                color:white;
-                font-weight:900;
-            ">
-                B · 두 번째 상품
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.markdown(
-            "**② 여기에 상품 B 사진을 올려주세요**"
-        )
-        st.caption(
-            "두 번째 후보의 정면 또는 전체 사진을 선택해주세요. "
-            "JPG·PNG·WEBP, 10MB 이하"
-        )
-
-        product_b = st.file_uploader(
-            "상품 B 사진",
-            type=["jpg", "jpeg", "png", "webp"],
-            key="product_b",
-            label_visibility="collapsed"
-        )
-
-        if product_b:
-            st.image(
-                product_b,
-                caption="상품 B",
-                width=260
-            )
-
-
-st.markdown("---")
-
-
-# 조건 입력과 결과를 좌우로 배치
+# 4. 입력 영역과 결과 영역
 input_column, result_column = st.columns(
-    [1.05, 0.95],
+    [1.15, 0.85],
     gap="large"
 )
 
 
-# 왼쪽: 쇼핑 조건 입력
+# 왼쪽: 상품 사진과 조건 입력
 with input_column:
-    st.markdown("### 나의 쇼핑 조건")
-
-    st.info(
-        "① 음성 또는 직접 입력 중 한 가지 방법을 선택하고, "
-        "② 입력된 쇼핑 조건을 확인해주세요."
+    st.markdown(
+        """
+        <div class="section-intro">
+            <div class="section-label">STEP 1</div>
+            <div class="section-title">비교할 두 상품을 보여주세요</div>
+            <div class="section-description">
+                마지막까지 고민 중인 상품 A와 B의 사진을 각각 올려주세요.
+                JPG, PNG, WEBP 형식을 지원하며 사진 한 장은 10MB 이하를 권장합니다.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
+    product_a_column, product_b_column = st.columns(
+        2,
+        gap="medium"
+    )
 
-    # 입력값을 기억하기 위한 session_state
-    if "purpose_text" not in st.session_state:
-        st.session_state.purpose_text = ""
+    # 상품 A
+    with product_a_column:
+        with st.container(border=True):
+            st.markdown("#### 🟡 상품 A")
+            st.caption("첫 번째 후보 사진을 아래에 올려주세요.")
 
-    if "budget_text" not in st.session_state:
-        st.session_state.budget_text = ""
+            product_a = st.file_uploader(
+                "상품 A 사진 선택",
+                type=["jpg", "jpeg", "png", "webp"],
+                key="product_a",
+                label_visibility="collapsed"
+            )
 
-    if "priority_text" not in st.session_state:
-        st.session_state.priority_text = ""
+            if product_a:
+                st.image(
+                    product_a,
+                    caption="상품 A",
+                    width=230
+                )
+            else:
+                st.caption("아직 상품 A 사진이 등록되지 않았어요.")
 
+    # 상품 B
+    with product_b_column:
+        with st.container(border=True):
+            st.markdown("#### 🔵 상품 B")
+            st.caption("두 번째 후보 사진을 아래에 올려주세요.")
 
-    # 입력 방법 선택
+            product_b = st.file_uploader(
+                "상품 B 사진 선택",
+                type=["jpg", "jpeg", "png", "webp"],
+                key="product_b",
+                label_visibility="collapsed"
+            )
+
+            if product_b:
+                st.image(
+                    product_b,
+                    caption="상품 B",
+                    width=230
+                )
+            else:
+                st.caption("아직 상품 B 사진이 등록되지 않았어요.")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # 쇼핑 조건 입력
+    st.markdown(
+        """
+        <div class="section-intro">
+            <div class="section-label">STEP 2</div>
+            <div class="section-title">나의 쇼핑 조건을 알려주세요</div>
+            <div class="section-description">
+                음성으로 한 번에 말하거나 직접 입력할 수 있습니다.
+                음성으로 입력한 내용도 분석 전에 직접 확인하고 수정할 수 있어요.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     input_method = st.radio(
-        "어떤 방법으로 쇼핑 조건을 입력할까요?",
-        [
-            "🎙️ 음성으로 한 번에 입력",
-            "⌨️ 직접 입력"
+        "조건 입력 방법",
+        options=[
+            "🎙️ 음성으로 말하기",
+            "⌨️ 직접 입력하기"
         ],
         horizontal=True,
-        key="condition_input_method"
+        key="input_method"
     )
 
-
     # 음성 입력
-    if input_method == "🎙️ 음성으로 한 번에 입력":
-        st.caption(
-            "사용 목적·예산·중요 기준을 한 문장으로 말해주세요. "
-            "예: 출퇴근용 가방이고 예산은 20만 원이며 "
-            "오래 사용할 수 있는 것이 중요해요."
+    if input_method == "🎙️ 음성으로 말하기":
+        st.info(
+            "예시: 출퇴근할 때 사용할 가방이고, "
+            "예산은 20만 원이에요. 오래 사용할 수 있는 것이 중요해요."
         )
 
         recorded_audio = st.audio_input(
             "쇼핑 조건 녹음하기",
-            sample_rate=16000,
-            key="shopping_condition_audio"
-        )
-
-        st.caption(
-            "녹음 화면에 오류가 표시되면 브라우저의 마이크 권한을 "
-            "허용하거나 '직접 입력' 방식을 선택해주세요."
+            help=(
+                "사용 목적, 예산, 중요하게 보는 기준을 "
+                "한 문장으로 천천히 말해주세요."
+            ),
+            key="recorded_audio"
         )
 
         voice_button = st.button(
-            "음성 내용을 조건 칸에 자동으로 채우기",
+            "음성에서 쇼핑 조건 가져오기",
             disabled=(recorded_audio is None),
             use_container_width=True
         )
@@ -755,8 +913,8 @@ with input_column:
         if voice_button:
             if not api_key:
                 st.error(
-                    "음성 변환을 사용하려면 먼저 사이드바에 "
-                    "Gemini API 키를 입력해주세요."
+                    "먼저 왼쪽 설정에서 Gemini 연결키를 입력해주세요. "
+                    "연결키가 없다면 '처음 사용하시나요?' 안내를 확인해주세요."
                 )
 
             else:
@@ -764,12 +922,20 @@ with input_column:
                     client = genai.Client(api_key=api_key)
 
                     with st.spinner(
-                        "소담픽이 음성에서 쇼핑 조건을 정리하고 있어요..."
+                        "소담픽이 음성에서 사용 목적과 예산, "
+                        "중요 기준을 확인하고 있어요..."
                     ):
                         voice_conditions = speech_to_conditions(
                             client=client,
                             audio_bytes=recorded_audio.getvalue(),
-                            mime_type=recorded_audio.type
+                            mime_type=(
+                                getattr(
+                                    recorded_audio,
+                                    "type",
+                                    "audio/wav"
+                                )
+                                or "audio/wav"
+                            )
                         )
 
                     st.session_state.purpose_text = (
@@ -778,12 +944,14 @@ with input_column:
                     st.session_state.budget_text = (
                         voice_conditions["budget"]
                     )
-                    st.session_state.priority_text = (
+                    st.session_state.priority_choice = (
                         voice_conditions["priority"]
                     )
-                    st.session_state.voice_applied = True
 
-                    st.rerun()
+                    st.success(
+                        "음성에서 확인한 내용을 아래 입력칸에 채웠어요. "
+                        "내용이 맞는지 확인하고 필요한 부분은 수정해주세요."
+                    )
 
                 except ValueError as error:
                     st.error(str(error))
@@ -807,33 +975,23 @@ with input_column:
 
                 except Exception:
                     st.error(
-                        "음성을 쇼핑 조건으로 변환하지 못했습니다. "
-                        "다시 녹음하거나 직접 입력해주세요."
+                        "음성을 확인하지 못했습니다. "
+                        "조금 더 천천히 다시 녹음해주세요."
                     )
 
+        st.caption(
+            "휴대전화나 브라우저에서 마이크 사용 권한이 차단된 경우에는 "
+            "'직접 입력하기'를 이용해주세요."
+        )
 
     # 직접 입력
     else:
-        st.caption(
-            "마이크를 사용하지 않고 아래 세 항목을 직접 입력해주세요."
+        st.info(
+            "아래 세 가지 조건을 직접 입력해주세요. "
+            "정확하게 입력할수록 나에게 더 적합한 결과를 받을 수 있어요."
         )
 
-
-    # 음성 자동 입력 완료 안내
-    if st.session_state.pop("voice_applied", False):
-        st.success(
-            "음성에서 쇼핑 조건을 자동으로 채웠습니다. "
-            "아래 내용을 확인하고 필요한 경우 수정해주세요."
-        )
-
-
-    # 공통 입력칸
-    if input_method == "🎙️ 음성으로 한 번에 입력":
-        st.markdown("#### 자동 입력된 조건 확인 및 수정")
-    else:
-        st.markdown("#### 쇼핑 조건 직접 입력")
-
-
+    # 음성 또는 직접 입력 결과 확인
     purpose = st.text_area(
         "어디에서 어떻게 사용할 상품인가요?",
         key="purpose_text",
@@ -842,60 +1000,71 @@ with input_column:
         )
     )
 
-    budget = st.text_input(
-        "생각하고 있는 예산은 얼마인가요?",
-        key="budget_text",
-        placeholder="예: 20만 원 이하"
+    condition_column, priority_column = st.columns(2)
+
+    with condition_column:
+        budget = st.text_input(
+            "생각하고 있는 예산은 얼마인가요?",
+            key="budget_text",
+            placeholder="예: 20만 원 이하"
+        )
+
+    with priority_column:
+        priority = st.text_input(
+            "가장 중요하게 보는 기준은 무엇인가요?",
+            key="priority_choice",
+            placeholder="예: 오래 사용할 수 있는 실용성"
+        )
+
+    st.caption(
+        "중요 기준 예시: 디자인, 실용성, 편안함, 수납력, "
+        "관리 편의성, 가격 대비 만족도"
     )
 
-    priority = st.text_input(
-        "가장 중요하게 보는 기준은 무엇인가요?",
-        key="priority_text",
-        placeholder="예: 오래 사용할 수 있는 실용성"
+    # 현재 비교 방식
+    st.info(
+        f"현재 비교 방식: **{decision_mode}**  \n"
+        "비교 방식은 왼쪽 소담픽 설정에서 변경할 수 있어요."
     )
 
-
-    # AI 비교 실행
+    # 비교 실행 버튼
     analyze_button = st.button(
-        "✨ 소담픽에게 마지막 선택 맡기기",
+        "소담픽에게 마지막 선택 맡기기",
         type="primary",
         use_container_width=True
     )
 
-
     if analyze_button:
-        # 이전 결과 제거
+        # 오래된 결과 제거
         st.session_state.pop("result", None)
         st.session_state.pop("result_audio", None)
         st.session_state.pop("audio_error", None)
-        st.session_state.pop("result_mode", None)
+        st.session_state.pop("analysis_mode_used", None)
 
         if not api_key:
             st.error(
-                "먼저 사이드바에 본인의 Gemini API 키를 입력해주세요."
+                "먼저 왼쪽 설정에서 Gemini 연결키를 입력해주세요."
             )
 
         elif not product_a or not product_b:
             st.error(
-                "최종 후보인 상품 A와 상품 B 사진을 모두 올려주세요."
+                "상품 A와 상품 B 사진을 모두 올려주세요."
             )
 
         elif not purpose.strip():
             st.error(
-                "상품을 사용할 목적이나 상황을 입력해주세요."
+                "상품을 사용하는 목적이나 상황을 입력해주세요."
             )
 
         elif not budget.strip():
             st.error(
                 "생각하고 있는 예산을 입력해주세요. "
-                "정해진 예산이 없다면 "
-                "'별도 예산 없음'이라고 입력해주세요."
+                "정해진 예산이 없다면 '정해진 예산 없음'이라고 입력해주세요."
             )
 
         elif not priority.strip():
             st.error(
-                "상품을 선택할 때 가장 중요하게 보는 기준을 "
-                "입력해주세요."
+                "가장 중요하게 보는 기준을 입력해주세요."
             )
 
         else:
@@ -903,7 +1072,7 @@ with input_column:
                 client = genai.Client(api_key=api_key)
 
                 with st.spinner(
-                    "소담픽이 두 상품과 나의 조건을 비교하고 있어요..."
+                    "소담픽이 상품 A와 B를 나의 조건에 맞춰 비교하고 있어요..."
                 ):
                     image_a = convert_to_jpeg(
                         product_a.getvalue()
@@ -924,19 +1093,10 @@ with input_column:
                         decision_mode=decision_mode
                     )
 
-                    st.session_state.result = result
-                    st.session_state.result_mode = decision_mode
-
-                    # 음성 출력 오류가 분석 결과에 영향을 주지 않도록 분리
-                    try:
-                        st.session_state.result_audio = (
-                            text_to_speech(result)
-                        )
-                        st.session_state.audio_error = False
-
-                    except Exception:
-                        st.session_state.result_audio = None
-                        st.session_state.audio_error = True
+                st.session_state.result = result
+                st.session_state.analysis_mode_used = decision_mode
+                st.session_state.result_audio = None
+                st.session_state.audio_error = False
 
             except ValueError as error:
                 st.error(str(error))
@@ -960,42 +1120,113 @@ with input_column:
 
             except Exception:
                 st.error(
-                    "상품을 비교하는 중 예상하지 못한 오류가 "
-                    "발생했습니다. 입력 내용을 확인한 후 "
-                    "다시 시도해주세요."
+                    "상품을 비교하는 중 예상하지 못한 오류가 발생했습니다. "
+                    "사진과 입력 내용을 확인한 후 다시 시도해주세요."
                 )
 
 
 # 오른쪽: 추천 결과
 with result_column:
-    st.markdown("### 소담픽의 마지막 선택")
+    st.markdown(
+        """
+        <div class="section-intro">
+            <div class="section-label">STEP 3</div>
+            <div class="section-title">소담픽의 최종 선택</div>
+            <div class="section-description">
+                입력한 조건을 기준으로 하나를 선택하고,
+                구매 전에 확인할 내용까지 정리해드려요.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    if "result" in st.session_state:
-        st.caption(
-            "분석에 사용한 방식: "
-            f"{st.session_state.get('result_mode', decision_mode)}"
+    if "result" not in st.session_state:
+        st.markdown(
+            """
+            <div class="empty-result">
+                <div class="empty-result-icon">🧭</div>
+                <div class="empty-result-title">
+                    아직 비교 결과가 없어요
+                </div>
+                상품 A와 B의 사진을 올리고<br>
+                나의 쇼핑 조건을 입력한 다음<br>
+                <b>마지막 선택 맡기기</b> 버튼을 눌러주세요.
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
+        st.markdown("#### 준비 상태")
+
+        if api_key:
+            st.caption("✅ Gemini 연결키 입력 완료")
+        else:
+            st.caption("○ Gemini 연결키가 필요해요")
+
+        if product_a and product_b:
+            st.caption("✅ 상품 A·B 사진 등록 완료")
+        else:
+            st.caption("○ 상품 A·B 사진을 올려주세요")
+
+        if (
+            purpose.strip()
+            and budget.strip()
+            and priority.strip()
+        ):
+            st.caption("✅ 쇼핑 조건 입력 완료")
+        else:
+            st.caption("○ 사용 목적·예산·중요 기준을 입력해주세요")
+
+    else:
         final_choice = extract_final_choice(
             st.session_state.result
         )
 
-        st.success(
-            f"🏆 최종 선택: {final_choice}"
+        used_mode = st.session_state.get(
+            "analysis_mode_used",
+            decision_mode
         )
 
-        st.markdown("#### 선택 이유와 확인사항")
+        st.caption(
+            f"분석에 사용한 방식: {used_mode}"
+        )
+
+        st.success(
+            f"🏆 소담픽의 선택: {final_choice}"
+        )
 
         with st.container(border=True):
+            st.markdown("#### 선택 이유와 확인사항")
             st.markdown(
                 st.session_state.result
             )
 
-        if st.session_state.get("result_audio"):
-            st.caption(
-                "🔊 소담픽의 마지막 선택을 짧게 들어보세요."
+        # 결과를 먼저 보여주고 음성은 사용자가 원할 때 생성
+        if not st.session_state.get("result_audio"):
+            make_audio_button = st.button(
+                "🔊 최종 선택 음성으로 듣기",
+                key="make_result_audio",
+                use_container_width=True
             )
 
+            if make_audio_button:
+                try:
+                    with st.spinner(
+                        "짧은 음성 안내를 준비하고 있어요..."
+                    ):
+                        st.session_state.result_audio = (
+                            text_to_speech(
+                                st.session_state.result
+                            )
+                        )
+                        st.session_state.audio_error = False
+
+                except Exception:
+                    st.session_state.result_audio = None
+                    st.session_state.audio_error = True
+
+        if st.session_state.get("result_audio"):
             st.audio(
                 st.session_state.result_audio,
                 format="audio/mp3"
@@ -1003,7 +1234,7 @@ with result_column:
 
         elif st.session_state.get("audio_error"):
             st.warning(
-                "추천 결과는 완성됐지만 "
+                "비교 결과는 완성됐지만 "
                 "음성 안내를 준비하지 못했습니다."
             )
 
@@ -1015,29 +1246,20 @@ with result_column:
             use_container_width=True
         )
 
-    else:
-        st.caption(
-            f"현재 선택한 분석 방식: {decision_mode}"
-        )
 
-        with st.container(border=True):
-            st.markdown("#### 결과를 기다리고 있어요")
-            st.write(
-                "왼쪽에서 쇼핑 조건을 입력한 후 "
-                "'소담픽에게 마지막 선택 맡기기' 버튼을 눌러주세요."
-            )
-
-
-# 서비스 대상과 Closing
+# 5. 서비스 대상과 구매 전 확인사항
 st.markdown("---")
 
-st.info(
-    "소담픽은 두 상품 사이에서 고민하는 사용자를 위해 "
-    "목적·예산·우선순위를 반영해 지금 더 맞는 하나를 골라주는 "
-    "AI 쇼핑 결정 비서입니다."
+st.markdown(
+    """
+    **소담픽은 마지막 두 상품 사이에서 고민하는 사용자를 위해**  
+    사용 목적·예산·중요 기준을 반영하여 지금 더 적합한 하나를
+    골라주는 AI 쇼핑 결정 비서입니다.
+    """
 )
 
 st.caption(
-    "소담픽은 상품을 판매하지 않습니다. "
-    "구매 전 가격·소재·크기·배송·교환 정보를 직접 확인해주세요."
+    "소담픽은 특정 상품을 판매하지 않습니다. "
+    "최종 구매 전에는 쇼핑몰에서 가격·소재·크기·배송·교환 정보를 "
+    "직접 확인해주세요."
 )
