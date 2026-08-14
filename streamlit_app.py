@@ -28,7 +28,7 @@ st.markdown(
 
     .block-container {
         max-width: 1180px;
-        padding-top: 2rem;
+        padding-top: 4rem;
         padding-bottom: 5rem;
     }
 
@@ -788,71 +788,20 @@ if "result" in st.session_state:
     )
 
 
-# 서비스 특징
-st.markdown("---")
-st.markdown("## 소담픽이 잘하는 것")
-
-feature_one, feature_two, feature_three = st.columns(3)
-
-with feature_one:
-    with st.container(border=True):
-        st.markdown("### 🆚 A와 B만 비교")
-        st.write(
-            "수많은 상품을 검색하는 대신 "
-            "마지막 두 후보에 집중합니다."
-        )
-
-with feature_two:
-    with st.container(border=True):
-        st.markdown("### 🎯 나의 조건 반영")
-        st.write(
-            "사용 목적과 예산, 중요 기준을 반영해 "
-            "지금 나에게 맞는 상품을 판단합니다."
-        )
-
-with feature_three:
-    with st.container(border=True):
-        st.markdown("### 🏆 하나로 결정")
-        st.write(
-            "단순한 장단점 나열에서 끝나지 않고 "
-            "최종 하나와 선택 이유를 제시합니다."
-        )
-
 
 # 서비스 대상과 Closing
-st.markdown(
+
+st.markdown("---")
+
+st.info(
     """
-    <div style="
-        margin-top:24px;
-        padding:28px;
-        border-radius:22px;
-        background:#EEF3FF;
-        border:1px solid #D9E3FA;
-        text-align:center;
-    ">
-        <div style="
-            font-size:1.35rem;
-            font-weight:900;
-            color:#18233A;
-            margin-bottom:10px;
-        ">
-            마지막 두 후보 사이에서 멈춘 사람을 위해
-        </div>
+    **마지막 두 후보 사이에서 멈춘 사람을 위해**
 
-        <div style="
-            color:#566078;
-            line-height:1.8;
-        ">
-            소담픽은 모든 상품을 검색해주는 일반 쇼핑 비서가 아닙니다.<br>
-            두 개의 최종 후보 중 하나를 선택하지 못하는 사용자를 위해<br>
-            목적·예산·우선순위를 기준으로 마지막 결정을 돕는
-            AI 쇼핑 결정 비서입니다.
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
+    소담픽은 두 개의 최종 후보 중 하나를 고르기 어려운 사용자를 위해  
+    목적·예산·우선순위를 기준으로 마지막 결정을 돕는  
+    AI 쇼핑 결정 비서입니다.
+    """
 )
-
 
 # 구매 전 확인 안내
 st.caption(
