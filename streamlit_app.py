@@ -114,10 +114,8 @@ st.markdown(
         color: var(--coral);
     }
 
-    .hero-description {
-        color: var(--muted);
-        font-size: 1rem;
-        line-height: 1.65;
+    .pick-phrase {
+        white-space: nowrap;
     }
 
     .summary-line {
@@ -143,9 +141,18 @@ st.markdown(
     }
 
     .upload-help {
+        margin: 5px 0 4px;
+        color: var(--navy);
+        font-size: 1.02rem;
+        line-height: 1.45;
+        font-weight: 850;
+    }
+
+    .upload-format {
+        margin-bottom: 8px;
         color: var(--muted);
-        font-size: 0.91rem;
-        line-height: 1.5;
+        font-size: 0.84rem;
+        font-weight: 600;
     }
 
     .question-number {
@@ -262,10 +269,6 @@ st.markdown(
 
         .hero-title {
             letter-spacing: -1.5px;
-        }
-
-        .hero-description {
-            font-size: 0.96rem;
         }
 
         div[data-testid="stAudioInput"] {
@@ -645,21 +648,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-hero_text_column, hero_image_column = st.columns([1.5, 0.5], gap="large")
+hero_text_column, hero_image_column = st.columns([1.3, 0.7], gap="large")
 
 with hero_text_column:
     st.markdown(
         """
         <div class="hero-title">
-            사진 두 장, 질문 세 개면 <span class="accent">Pick완!</span>
+            사진 두 장, <span class="pick-phrase">질문 세 개면
+            <span class="accent">Pick완!</span></span>
         </div>
         <div class="hero-subtitle">
             내 조건에 딱 맞는 하나, AI 쇼핑비서
             <span class="accent">소담픽</span>이 골라드려요.
-        </div>
-        <div class="hero-description">
-            상품 사진 두 장과 사용 목적·예산·우선순위를 입력하면
-            AI가 최종 선택과 이유를 알려드립니다.
         </div>
         <div class="summary-line">
             <span>사진 2장</span><span>질문 3개</span><span>추천 1개</span>
@@ -687,8 +687,8 @@ with input_column:
         with st.container(border=True):
             st.markdown(
                 '<div class="upload-title">🟡 상품 A 사진</div>'
-                '<div class="upload-help">여기를 눌러 첫 번째 후보 사진을 올려주세요.<br>'
-                'JPG·PNG·WEBP / 최대 10MB</div>',
+                '<div class="upload-help">첫 번째 후보 사진을 올려주세요</div>'
+                '<div class="upload-format">JPG·PNG·WEBP / 최대 10MB</div>',
                 unsafe_allow_html=True,
             )
             product_a = st.file_uploader(
@@ -704,8 +704,8 @@ with input_column:
         with st.container(border=True):
             st.markdown(
                 '<div class="upload-title">🔵 상품 B 사진</div>'
-                '<div class="upload-help">여기를 눌러 두 번째 후보 사진을 올려주세요.<br>'
-                'JPG·PNG·WEBP / 최대 10MB</div>',
+                '<div class="upload-help">두 번째 후보 사진을 올려주세요</div>'
+                '<div class="upload-format">JPG·PNG·WEBP / 최대 10MB</div>',
                 unsafe_allow_html=True,
             )
             product_b = st.file_uploader(
