@@ -86,7 +86,6 @@ The service is designed for shoppers who need help making the **final decision b
 
 ![최종 추천 결과 화면](screenshots/04_result.png)
 
-> 위 화면을 표시하려면 저장소에 `screenshots` 폴더를 만들고 같은 이름의 이미지 4장을 올려주세요.
 
 ---
 
