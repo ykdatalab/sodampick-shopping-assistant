@@ -108,6 +108,7 @@ st.markdown(
         line-height: 1.35;
         letter-spacing: -1px;
         font-weight: 850;
+        word-break: keep-all;
     }
 
     .accent {
@@ -115,6 +116,10 @@ st.markdown(
     }
 
     .pick-phrase {
+        white-space: nowrap;
+    }
+
+    .sodampick-phrase {
         white-space: nowrap;
     }
 
@@ -336,6 +341,17 @@ with st.sidebar:
     st.caption("🔒 입력한 키는 저장하거나 GitHub에 기록하지 않아요.")
 
     st.markdown("---")
+    decision_mode = st.radio(
+        "의사결정 모드",
+        options=list(MODEL_OPTIONS.keys()),
+        key="decision_mode",
+        help="빠른 응답은 속도에, 꼼꼼 비교는 자세한 설명에 적합해요.",
+    )
+    selected_model = MODEL_OPTIONS[decision_mode]
+    st.caption(f"`{selected_model}`")
+    st.caption(MODEL_DESCRIPTIONS[decision_mode])
+
+    st.markdown("---")
     st.markdown("#### 도움말")
     with st.expander("사용 방법"):
         st.write(
@@ -354,17 +370,6 @@ with st.sidebar:
             "API 키를 코드나 GitHub에 직접 작성하지 마세요. "
             "민감한 개인정보가 포함된 사진도 올리지 않는 것이 좋아요."
         )
-
-    st.markdown("---")
-    decision_mode = st.radio(
-        "의사결정 모드",
-        options=list(MODEL_OPTIONS.keys()),
-        key="decision_mode",
-        help="빠른 응답은 속도에, 꼼꼼 비교는 자세한 설명에 적합해요.",
-    )
-    selected_model = MODEL_OPTIONS[decision_mode]
-    st.caption(f"`{selected_model}`")
-    st.caption(MODEL_DESCRIPTIONS[decision_mode])
 
     st.markdown("---")
     if st.button(
@@ -658,8 +663,8 @@ with hero_text_column:
             <span class="accent">Pick완!</span></span>
         </div>
         <div class="hero-subtitle">
-            내 조건에 딱 맞는 하나, AI 쇼핑비서
-            <span class="accent">소담픽</span>이 골라드려요.
+            내 조건에 딱 맞는 하나,<br>
+            AI 쇼핑비서 <span class="accent sodampick-phrase">소담픽이 골라드려요.</span>
         </div>
         <div class="summary-line">
             <span>사진 2장</span><span>질문 3개</span><span>추천 1개</span>
