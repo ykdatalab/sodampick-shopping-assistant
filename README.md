@@ -28,6 +28,12 @@ SodamPick is an AI shopping assistant for users who have narrowed their choices 
 
 The service is designed for shoppers who need help making the **final decision between two candidates**, rather than searching for more products.
 
+### CRM Use Case Diagram
+
+현재 구현 기능과 향후 CRM 확장 기능을 고객, 운영자 및 외부 서비스 관점에서 정리했습니다.
+
+![SodamPick CRM Use Case Diagram](sodampick_usecase.svg)
+
 ---
 
 ## 3. 소담픽이 잘하는 일 | Key Features
@@ -54,6 +60,13 @@ The service is designed for shoppers who need help making the **final decision b
 5. `소담픽에게 최종 선택 맡기기` 버튼을 누릅니다.
 6. 최종 선택, 선택 이유, 다른 상품이 적합한 경우와 구매 전 확인사항을 확인합니다.
 7. 필요한 경우 결과를 음성으로 듣거나 텍스트 파일로 저장합니다.
+
+### 서비스 처리 흐름
+
+아래 플로우차트는 상품 등록부터 비교 조건 입력, Gemini 분석,
+추천 결과 제공 및 재비교까지의 처리 과정을 보여줍니다.
+
+![SodamPick Service Flowchart](sodampick_flowchart.svg)
 
 ---
 
